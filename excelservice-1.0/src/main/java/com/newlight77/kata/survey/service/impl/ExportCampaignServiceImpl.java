@@ -25,6 +25,9 @@ public class ExportCampaignServiceImpl implements ExportCampaignService{
   private CampaignClient campaignWebService;
   private MailServiceImpl mailService;
   private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+  private static String headerCellValue="Survey";
+  private static String clientCellValue="Client";
+  private static String surveyNumber="Number of surveys";
 
   public ExportCampaignServiceImpl(final CampaignClient campaignWebService, MailServiceImpl mailService) {
     this.campaignWebService = campaignWebService;
@@ -59,29 +62,12 @@ public class ExportCampaignServiceImpl implements ExportCampaignService{
     // 1ere ligne =  l'entête
     Row header = sheet.createRow(0);
 
-    CellStyle headerStyle = workbook.createCellStyle();
-    headerStyle.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
-    headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
-    XSSFFont font = ((XSSFWorkbook) workbook).createFont();
-    font.setFontName("Arial");
-    font.setFontHeightInPoints((short) 14);
-    font.setBold(true);
-    headerStyle.setFont(font);
-    headerStyle.setWrapText(false);
-
+    CellStyle headerStyle = getHeaderStyle(workbook);
     Cell headerCell = header.createCell(0);
-    headerCell.setCellValue("Survey");
+    headerCell.setCellValue(headerCellValue);
     headerCell.setCellStyle(headerStyle);
 
-    CellStyle titleStyle = workbook.createCellStyle();
-    titleStyle.setFillForegroundColor(IndexedColors.LIGHT_GREEN.getIndex());
-    titleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-    XSSFFont titleFont = ((XSSFWorkbook) workbook).createFont();
-    titleFont.setFontName("Arial");
-    titleFont.setFontHeightInPoints((short) 12);
-    titleFont.setUnderline(FontUnderline.SINGLE);
-    titleStyle.setFont(titleFont);
+    CellStyle titleStyle = getTitleStyle(workbook);
 
     CellStyle style = workbook.createCellStyle();
     style.setWrapText(true);
@@ -89,7 +75,7 @@ public class ExportCampaignServiceImpl implements ExportCampaignService{
     // section client
     Row row = sheet.createRow(2);
     Cell cell = row.createCell(0);
-    cell.setCellValue("Client");
+    cell.setCellValue(clientCellValue);
     cell.setCellStyle(titleStyle);
 
     Row clientRow = sheet.createRow(3);
@@ -97,9 +83,9 @@ public class ExportCampaignServiceImpl implements ExportCampaignService{
     nomClientRowLabel.setCellValue(survey.getClient());
     nomClientRowLabel.setCellStyle(style);
 
-    String clientAddress = survey.getClientAddress().getStreetNumber() + " "
-            + survey.getClientAddress().getStreetName() + survey.getClientAddress().getPostalCode() + " "
-            + survey.getClientAddress().getCity();
+    StringBuilder clientAddressValue=new StringBuilder(survey.getClientAddress().getStreetNumber()).append(survey.getClientAddress().getStreetName())
+            .append(survey.getClientAddress().getPostalCode() ).append(survey.getClientAddress().getCity());
+    String clientAddress = clientAddressValue.toString();
 
     Row clientAddressLabelRow = sheet.createRow(4);
     Cell clientAddressCell = clientAddressLabelRow.createCell(0);
@@ -108,56 +94,18 @@ public class ExportCampaignServiceImpl implements ExportCampaignService{
 
     row = sheet.createRow(6);
     cell = row.createCell(0);
-    cell.setCellValue("Number of surveys");
+    cell.setCellValue(surveyNumber);
     cell = row.createCell(1);
     cell.setCellValue(campaign.getAddressStatuses().size());
 
-    Row surveyLabelRow = sheet.createRow(8);
-    Cell surveyLabelCell = surveyLabelRow.createCell(0);
-    surveyLabelCell.setCellValue("N° street");
-    surveyLabelCell.setCellStyle(style);
-
-    surveyLabelCell = surveyLabelRow.createCell(1);
-    surveyLabelCell.setCellValue("streee");
-    surveyLabelCell.setCellStyle(style);
-
-    surveyLabelCell = surveyLabelRow.createCell(2);
-    surveyLabelCell.setCellValue("Postal code");
-    surveyLabelCell.setCellStyle(style);
-
-    surveyLabelCell = surveyLabelRow.createCell(3);
-    surveyLabelCell.setCellValue("City");
-    surveyLabelCell.setCellStyle(style);
-
-    surveyLabelCell = surveyLabelRow.createCell(4);
-    surveyLabelCell.setCellValue("Status");
-    surveyLabelCell.setCellStyle(style);
+    createSurveyRow(sheet, style, 8, "N° street", "streee", "Postal code", "City", "Status");
 
     int startIndex = 9;
     int currentIndex = 0;
 
     for (AddressStatus addressStatus : campaign.getAddressStatuses()) {
 
-      Row surveyRow = sheet.createRow(startIndex + currentIndex);
-      Cell surveyRowCell = surveyRow.createCell(0);
-      surveyRowCell.setCellValue(addressStatus.getAddress().getStreetNumber());
-      surveyRowCell.setCellStyle(style);
-
-      surveyRowCell = surveyRow.createCell(1);
-      surveyRowCell.setCellValue(addressStatus.getAddress().getStreetName());
-      surveyRowCell.setCellStyle(style);
-
-      surveyRowCell = surveyRow.createCell(2);
-      surveyRowCell.setCellValue(addressStatus.getAddress().getPostalCode());
-      surveyRowCell.setCellStyle(style);
-
-      surveyRowCell = surveyRow.createCell(3);
-      surveyRowCell.setCellValue(addressStatus.getAddress().getCity());
-      surveyRowCell.setCellStyle(style);
-
-      surveyRowCell = surveyRow.createCell(4);
-      surveyRowCell.setCellValue(addressStatus.getStatus().toString());
-      surveyRowCell.setCellStyle(style);
+      createSurveyRow(sheet, style, startIndex + currentIndex, addressStatus.getAddress().getStreetNumber(), addressStatus.getAddress().getStreetName(), addressStatus.getAddress().getPostalCode(), addressStatus.getAddress().getCity(), addressStatus.getStatus().toString());
 
       currentIndex++;
 
@@ -171,6 +119,55 @@ public class ExportCampaignServiceImpl implements ExportCampaignService{
       log.info("Error while trying to send email : ", fe);
     }
 
+  }
+
+  private CellStyle getTitleStyle(Workbook workbook) {
+    CellStyle titleStyle = workbook.createCellStyle();
+    titleStyle.setFillForegroundColor(IndexedColors.LIGHT_GREEN.getIndex());
+    titleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+    XSSFFont titleFont = ((XSSFWorkbook) workbook).createFont();
+    titleFont.setFontName("Arial");
+    titleFont.setFontHeightInPoints((short) 12);
+    titleFont.setUnderline(FontUnderline.SINGLE);
+    titleStyle.setFont(titleFont);
+    return titleStyle;
+  }
+
+  private CellStyle getHeaderStyle(Workbook workbook) {
+    CellStyle headerStyle = workbook.createCellStyle();
+    headerStyle.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
+    headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+    XSSFFont font = ((XSSFWorkbook) workbook).createFont();
+    font.setFontName("Arial");
+    font.setFontHeightInPoints((short) 14);
+    font.setBold(true);
+    headerStyle.setFont(font);
+    headerStyle.setWrapText(false);
+    return headerStyle;
+  }
+
+  private void createSurveyRow(Sheet sheet, CellStyle style, int i2, String streetNumber, String streetName, String postalCode, String city, String s) {
+    Row surveyRow = sheet.createRow(i2);
+    Cell surveyRowCell = surveyRow.createCell(0);
+    surveyRowCell.setCellValue(streetNumber);
+    surveyRowCell.setCellStyle(style);
+
+    surveyRowCell = surveyRow.createCell(1);
+    surveyRowCell.setCellValue(streetName);
+    surveyRowCell.setCellStyle(style);
+
+    surveyRowCell = surveyRow.createCell(2);
+    surveyRowCell.setCellValue(postalCode);
+    surveyRowCell.setCellStyle(style);
+
+    surveyRowCell = surveyRow.createCell(3);
+    surveyRowCell.setCellValue(city);
+    surveyRowCell.setCellStyle(style);
+
+    surveyRowCell = surveyRow.createCell(4);
+    surveyRowCell.setCellValue(s);
+    surveyRowCell.setCellStyle(style);
   }
 
   public void writeFileAndSend(Survey survey, Workbook workbook) throws ExportCampaignException,IOException {
