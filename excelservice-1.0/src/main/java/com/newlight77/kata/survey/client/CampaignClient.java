@@ -12,6 +12,11 @@ public class CampaignClient {
 
     private WebClient webClient;
 
+    private static final String uriSurvey="/surveys";
+    private static final String uriCampaign="/campaigns";
+
+
+
     public CampaignClient(@Value("${external.url}") String externalUrl) {
         webClient = WebClient.builder()
                 .baseUrl(externalUrl)
@@ -21,27 +26,27 @@ public class CampaignClient {
 
     public void createSurvey(Survey survey) {
         webClient.post()
-                .uri("/surveys")
+                .uri(uriSurvey)
                 .syncBody(survey)
                 .retrieve();
     }
 
     public Survey getSurvey(String id) {
         return webClient.get()
-                .uri("/surveys/" + id)
+                .uri(uriSurvey + id)
                 .retrieve()
                 .bodyToMono(Survey.class).block();
     }
 
     public void createCampaign(Campaign campaign) {
         webClient.post()
-                .uri("/campaigns")
+                .uri(uriCampaign)
                 .syncBody(campaign);
     }
 
     public Campaign getCampaign(String id) {
         return webClient.get()
-                .uri("/campaigns/" + id)
+                .uri(uriCampaign+ id)
                 .retrieve()
                 .bodyToMono(Campaign.class).block();
     }

@@ -1,10 +1,10 @@
+
 package com.newlight77.kata.survey;
 
 import com.newlight77.kata.survey.Exceptions.SendMailException;
 import com.newlight77.kata.survey.model.Campaign;
 import com.newlight77.kata.survey.model.Survey;
-import com.newlight77.kata.survey.service.ExportCampaignService;
-import com.newlight77.kata.survey.service.MailService;
+import com.newlight77.kata.survey.service.impl.ExportCampaignServiceImpl;
 import com.newlight77.kata.survey.service.impl.MailServiceImpl;
 import com.newlight77.kata.survey.util.JsonUtil;
 import org.junit.Before;
@@ -28,7 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 public class ApplicationTests {
 
 	@Autowired
-	private ExportCampaignService exportCampaignService;
+	private ExportCampaignServiceImpl exportCampaignService;
 
 	@MockBean
 	private MailServiceImpl mailService;
@@ -114,3 +114,5 @@ public class ApplicationTests {
 
 
 }
+
+

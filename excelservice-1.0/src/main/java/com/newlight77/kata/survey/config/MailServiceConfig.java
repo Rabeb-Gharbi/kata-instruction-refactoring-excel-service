@@ -12,6 +12,13 @@ public class MailServiceConfig {
   @Value("${service.mail.to}")
   private String[] to;
 
+  @Value("${service.mail.text}")
+  private String text;
+
+  @Value("${service.mail.subject}")
+  private String subject;
+
+
   public String getFrom() {
     return from;
   }
@@ -26,5 +33,21 @@ public class MailServiceConfig {
 
   public void setTo(String[] to) {
     this.to = to;
-  }  
+  }
+
+  public String getText() {
+    return text;
+  }
+
+  public void setText(String text) {
+    this.text = text;
+  }
+
+  public String getSubject() {
+    return subject;
+  }
+
+  public void setSubject(String subject) {
+    this.subject = subject;
+  }
 }

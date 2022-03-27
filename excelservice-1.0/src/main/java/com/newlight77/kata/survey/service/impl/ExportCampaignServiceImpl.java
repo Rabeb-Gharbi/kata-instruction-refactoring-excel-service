@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -21,12 +20,12 @@ import java.time.format.DateTimeFormatter;
 
 @Service
 @Slf4j
-public class ExportCampaignServiceImpl implements ExportCampaignService {
+public class ExportCampaignServiceImpl implements ExportCampaignService{
 
   private CampaignClient campaignWebService;
   private MailServiceImpl mailService;
   private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-  
+
   public ExportCampaignServiceImpl(final CampaignClient campaignWebService, MailServiceImpl mailService) {
     this.campaignWebService = campaignWebService;
     this.mailService = mailService;
@@ -48,7 +47,7 @@ public class ExportCampaignServiceImpl implements ExportCampaignService {
     return campaignWebService.getCampaign(id);
   }
 
-  public void sendResults(Campaign campaign, Survey survey) {
+  public void sendResults(Campaign campaign, Survey survey){
     Workbook workbook = new XSSFWorkbook();
 
     Sheet sheet = workbook.createSheet("Survey");
@@ -167,14 +166,14 @@ public class ExportCampaignServiceImpl implements ExportCampaignService {
     try {
       writeFileAndSend(survey, workbook);
     } catch (IOException e) {
-    log.info("Error while writing File : ", e);
-  } catch (ExportCampaignException e) {
-    log.info("Error while trying to send email : ", e);
-  }
+      log.info("Error while writing File : ", e);
+    } catch (ExportCampaignException fe) {
+      log.info("Error while trying to send email : ", fe);
+    }
 
   }
 
-  public void writeFileAndSend(Survey survey, Workbook workbook) throws ExportCampaignException, IOException {
+  public void writeFileAndSend(Survey survey, Workbook workbook) throws ExportCampaignException,IOException {
     try {
       File resultFile = new File(System.getProperty("java.io.tmpdir"), "survey-" + survey.getId() + "-" + dateTimeFormatter.format(LocalDate.now()) + ".xlsx");
       FileOutputStream outputStream = new FileOutputStream(resultFile);
@@ -185,11 +184,7 @@ public class ExportCampaignServiceImpl implements ExportCampaignService {
     } catch(Exception ex) {
       throw new ExportCampaignException("Error while trying to send email", ex);
     } finally {
-      try {
-        workbook.close();
-      } catch(Exception e) {
-        // CANT HAPPEN
-      }
+      workbook.close();
     }
   }
 
