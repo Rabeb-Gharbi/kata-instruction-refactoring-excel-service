@@ -1,9 +1,11 @@
 package com.newlight77.kata.survey.service;
 
+import com.newlight77.kata.survey.Exceptions.ExportCampaignException;
 import com.newlight77.kata.survey.model.AddressStatus;
 import com.newlight77.kata.survey.model.Campaign;
 import com.newlight77.kata.survey.model.Survey;
 import com.newlight77.kata.survey.client.CampaignClient;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -11,10 +13,12 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 @Component
+@Slf4j
 public class ExportCampaignService {
 
   private CampaignClient campaignWebService;
@@ -158,11 +162,17 @@ public class ExportCampaignService {
 
     }
 
-    writeFileAndSend(survey, workbook);
+    try {
+      writeFileAndSend(survey, workbook);
+    } catch (IOException e) {
+    log.info("Error while writing File : ", e);
+  } catch (ExportCampaignException e) {
+    log.info("Error while trying to send email : ", e);
+  }
 
   }
 
-  protected void writeFileAndSend(Survey survey, Workbook workbook) {
+  protected void writeFileAndSend(Survey survey, Workbook workbook) throws ExportCampaignException, IOException {
     try {
       File resultFile = new File(System.getProperty("java.io.tmpdir"), "survey-" + survey.getId() + "-" + dateTimeFormatter.format(LocalDate.now()) + ".xlsx");
       FileOutputStream outputStream = new FileOutputStream(resultFile);
@@ -171,7 +181,7 @@ public class ExportCampaignService {
       mailService.send(resultFile);
       resultFile.deleteOnExit();
     } catch(Exception ex) {
-        throw new RuntimeException("Errorr while trying to send email", ex);
+      throw new ExportCampaignException("Error while trying to send email", ex);
     } finally {
       try {
         workbook.close();

@@ -16,7 +16,7 @@ public class CampaignClient {
         webClient = WebClient.builder()
                 .baseUrl(externalUrl)
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, "application/json")
-                .build();;
+                .build();
     }
 
     public void createSurvey(Survey survey) {

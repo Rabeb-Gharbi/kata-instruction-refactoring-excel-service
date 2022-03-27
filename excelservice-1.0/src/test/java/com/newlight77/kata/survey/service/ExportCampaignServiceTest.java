@@ -1,5 +1,7 @@
 package com.newlight77.kata.survey.service;
 
+import com.newlight77.kata.survey.Exceptions.ExportCampaignException;
+import com.newlight77.kata.survey.Exceptions.SendMailException;
 import com.newlight77.kata.survey.client.CampaignClient;
 import com.newlight77.kata.survey.model.Campaign;
 import com.newlight77.kata.survey.model.Survey;
@@ -13,6 +15,7 @@ import org.junit.Test;
 import org.mockito.*;
 
 import java.io.File;
+import java.io.IOException;
 
 public class ExportCampaignServiceTest {
 
@@ -39,7 +42,7 @@ public class ExportCampaignServiceTest {
     }
 
     @Test
-    public void test() {
+    public void test() throws IOException, ExportCampaignException, SendMailException {
 
         // Arrange
         String surveyJson = "{\n" +

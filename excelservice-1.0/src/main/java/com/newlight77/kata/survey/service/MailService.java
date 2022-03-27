@@ -1,5 +1,6 @@
 package com.newlight77.kata.survey.service;
 
+import com.newlight77.kata.survey.Exceptions.SendMailException;
 import com.newlight77.kata.survey.config.MailServiceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,7 @@ public class MailService {
     this.mailServiceConfig = mailServiceConfig;
   }
 
-  public void send(File attachment) {
+  public void send(File attachment) throws SendMailException {
     MimeMessagePreparator messagePreparator = mimeMessage -> {
       MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage, true);
       messageHelper.setFrom(mailServiceConfig.getFrom());
@@ -38,7 +39,7 @@ public class MailService {
       mailSender.send(messagePreparator);
       logger.info("Email sent successfully");
     } catch (MailException e) {
-      throw new RuntimeException("An error occurred while sending an email", e);
+      throw new SendMailException("An error occurred while sending an email", e);
     }
   }
 

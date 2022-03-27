@@ -1,5 +1,6 @@
 package com.newlight77.kata.survey;
 
+import com.newlight77.kata.survey.Exceptions.SendMailException;
 import com.newlight77.kata.survey.model.Campaign;
 import com.newlight77.kata.survey.model.Survey;
 import com.newlight77.kata.survey.service.ExportCampaignService;
@@ -95,7 +96,7 @@ public class ApplicationTests {
 
 
 	@Test
-	public void exportcampaign() {
+	public void exportcampaign() throws SendMailException {
 
 		System.out.println("surveyJson =>" +surveyJson);
 		// WHEN
