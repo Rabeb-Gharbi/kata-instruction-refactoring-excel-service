@@ -5,6 +5,8 @@ import com.newlight77.kata.survey.Exceptions.SendMailException;
 import com.newlight77.kata.survey.client.CampaignClient;
 import com.newlight77.kata.survey.model.Campaign;
 import com.newlight77.kata.survey.model.Survey;
+import com.newlight77.kata.survey.service.impl.ExportCampaignServiceImpl;
+import com.newlight77.kata.survey.service.impl.MailServiceImpl;
 import com.newlight77.kata.survey.util.JsonUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -19,13 +21,13 @@ import java.io.IOException;
 
 public class ExportCampaignServiceTest {
 
-    private ExportCampaignService service;
+    private ExportCampaignServiceImpl service;
 
     @Mock
     private CampaignClient campaignClientMock;
 
     @Mock
-    private MailService mailServiceMock;
+    private MailServiceImpl mailServiceMock;
 
     @Captor
     private ArgumentCaptor<Survey> surveyCaptor;
@@ -37,7 +39,7 @@ public class ExportCampaignServiceTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
 
-        service = new ExportCampaignService(campaignClientMock, mailServiceMock);
+        service = new ExportCampaignServiceImpl(campaignClientMock, mailServiceMock);
         service = Mockito.spy(service);
     }
 

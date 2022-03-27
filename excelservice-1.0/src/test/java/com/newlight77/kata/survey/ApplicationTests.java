@@ -5,6 +5,7 @@ import com.newlight77.kata.survey.model.Campaign;
 import com.newlight77.kata.survey.model.Survey;
 import com.newlight77.kata.survey.service.ExportCampaignService;
 import com.newlight77.kata.survey.service.MailService;
+import com.newlight77.kata.survey.service.impl.MailServiceImpl;
 import com.newlight77.kata.survey.util.JsonUtil;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -30,7 +31,7 @@ public class ApplicationTests {
 	private ExportCampaignService exportCampaignService;
 
 	@MockBean
-	private MailService mailService;
+	private MailServiceImpl mailService;
 
 	private String surveyJson;
 
