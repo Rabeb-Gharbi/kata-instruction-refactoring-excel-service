@@ -4,9 +4,11 @@ import com.newlight77.kata.survey.model.Campaign;
 import com.newlight77.kata.survey.model.Survey;
 
 
-public interface ExportCampaignService {
+public interface CampaignService {
 
-    void sendResults(Campaign campaign, Survey survey);
+    void createCampaign(Campaign campaign);
+
+    Campaign getCampaign(String id);
 
 
 }

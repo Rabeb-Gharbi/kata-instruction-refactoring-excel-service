@@ -2,6 +2,7 @@ package com.newlight77.kata.survey.service.impl;
 
 import com.newlight77.kata.survey.Exceptions.ExportCampaignException;
 import com.newlight77.kata.survey.client.CampaignClient;
+import com.newlight77.kata.survey.client.impl.CampaignClientImpl;
 import com.newlight77.kata.survey.model.AddressStatus;
 import com.newlight77.kata.survey.model.Campaign;
 import com.newlight77.kata.survey.model.Survey;
@@ -28,26 +29,11 @@ public class ExportCampaignServiceImpl implements ExportCampaignService{
 
 
 
-    public ExportCampaignServiceImpl(final CampaignClient campaignWebService, MailServiceImpl mailService) {
+    public ExportCampaignServiceImpl(final CampaignClientImpl campaignWebService, MailServiceImpl mailService) {
         this.campaignWebService = campaignWebService;
         this.mailService = mailService;
     }
 
-    public void creerSurvey(Survey survey) {
-        campaignWebService.createSurvey(survey);
-    }
-
-    public Survey getSurvey(String id) {
-        return campaignWebService.getSurvey(id);
-    }
-
-    public void createCampaign(Campaign campaign) {
-        campaignWebService.createCampaign(campaign);
-    }
-
-    public Campaign getCampaign(String id) {
-        return campaignWebService.getCampaign(id);
-    }
 
     public void sendResults(Campaign campaign, Survey survey){
         Workbook workbook = new XSSFWorkbook();
@@ -57,12 +43,8 @@ public class ExportCampaignServiceImpl implements ExportCampaignService{
         for (int i = 1; i <= 18; i++) {
             sheet.setColumnWidth(i, 6000);
         }
-
         // 1ere ligne =  l'entête
-        Row header = sheet.createRow(0);
-        CellStyle headerStyle = getCellStyle(workbook, IndexedColors.LIGHT_BLUE.getIndex(),FillPatternType.SOLID_FOREGROUND,"Arial", (short) 14, true,false);
-
-        Cell headerCell=createCell(0,"Survey",header,headerStyle);
+        CreateHeader(workbook, sheet);
 
         CellStyle titleStyle = getCellStyle(workbook, IndexedColors.LIGHT_GREEN.getIndex(),FillPatternType.SOLID_FOREGROUND,"Arial", (short) 12, true,true);
 
@@ -70,6 +52,39 @@ public class ExportCampaignServiceImpl implements ExportCampaignService{
 
         // section client
 
+        createClientSection(campaign, survey, sheet, titleStyle, style);
+
+        int startIndex = 9;
+        int currentIndex = 0;
+
+        createAdressSection(campaign, sheet, style, startIndex, currentIndex);
+
+        try {
+            writeFileAndSend(survey, workbook);
+        } catch (IOException e) {
+            log.info("Error while writing File : ", e);
+        } catch (ExportCampaignException e) {
+            log.info("Error while trying to send email : ", e);
+        }
+
+    }
+
+    private void createAdressSection(Campaign campaign, Sheet sheet, CellStyle style, int startIndex, int currentIndex) {
+        for (AddressStatus addressStatus : campaign.getAddressStatuses()) {
+
+            Row surveyRow = sheet.createRow(startIndex + currentIndex);
+            createCell(0,addressStatus.getAddress().getStreetNumber(),surveyRow,style);
+            createCell(1,addressStatus.getAddress().getStreetName(),surveyRow,style);
+            createCell(2,addressStatus.getAddress().getPostalCode(),surveyRow,style);
+            createCell(3,addressStatus.getAddress().getCity(),surveyRow,style);
+            createCell(3,addressStatus.getStatus().toString(),surveyRow,style);
+
+            currentIndex++;
+
+        }
+    }
+
+    private void createClientSection(Campaign campaign, Survey survey, Sheet sheet, CellStyle titleStyle, CellStyle style) {
         Row row = sheet.createRow(2);
         Cell cell=createCell(0,"Client",row,titleStyle);
 
@@ -99,31 +114,13 @@ public class ExportCampaignServiceImpl implements ExportCampaignService{
         createCell(3,"City",surveyLabelRow,style);
 
         createCell(4,"Status",surveyLabelRow,style);
+    }
 
-        int startIndex = 9;
-        int currentIndex = 0;
+    private void CreateHeader(Workbook workbook, Sheet sheet) {
+        Row header = sheet.createRow(0);
+        CellStyle headerStyle = getCellStyle(workbook, IndexedColors.LIGHT_BLUE.getIndex(),FillPatternType.SOLID_FOREGROUND,"Arial", (short) 14, true,false);
 
-        for (AddressStatus addressStatus : campaign.getAddressStatuses()) {
-
-            Row surveyRow = sheet.createRow(startIndex + currentIndex);
-            createCell(0,addressStatus.getAddress().getStreetNumber(),surveyRow,style);
-            createCell(1,addressStatus.getAddress().getStreetName(),surveyRow,style);
-            createCell(2,addressStatus.getAddress().getPostalCode(),surveyRow,style);
-            createCell(3,addressStatus.getAddress().getCity(),surveyRow,style);
-            createCell(3,addressStatus.getStatus().toString(),surveyRow,style);
-
-            currentIndex++;
-
-        }
-
-        try {
-            writeFileAndSend(survey, workbook);
-        } catch (IOException e) {
-            log.info("Error while writing File : ", e);
-        } catch (ExportCampaignException e) {
-            log.info("Error while trying to send email : ", e);
-        }
-
+        Cell headerCell=createCell(0,"Survey",header,headerStyle);
     }
 
     private CellStyle getCellStyle(Workbook workbook, short foregroundColor,FillPatternType pattern,String fontName, short fontHeight, boolean bolt,boolean wrapText ) {

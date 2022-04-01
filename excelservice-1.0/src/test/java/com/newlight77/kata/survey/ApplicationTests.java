@@ -4,8 +4,11 @@ package com.newlight77.kata.survey;
 import com.newlight77.kata.survey.Exceptions.SendMailException;
 import com.newlight77.kata.survey.model.Campaign;
 import com.newlight77.kata.survey.model.Survey;
+import com.newlight77.kata.survey.service.CampaignService;
+import com.newlight77.kata.survey.service.impl.CampaignServiceImpl;
 import com.newlight77.kata.survey.service.impl.ExportCampaignServiceImpl;
 import com.newlight77.kata.survey.service.impl.MailServiceImpl;
+import com.newlight77.kata.survey.service.impl.SurveyServiceImpl;
 import com.newlight77.kata.survey.util.JsonUtil;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -29,6 +32,12 @@ public class ApplicationTests {
 
 	@Autowired
 	private ExportCampaignServiceImpl exportCampaignService;
+
+	@Autowired
+	private CampaignServiceImpl campaignService;
+
+	@Autowired
+	private SurveyServiceImpl surveyService;
 
 	@MockBean
 	private MailServiceImpl mailService;
@@ -103,8 +112,8 @@ public class ApplicationTests {
 		// WHEN
 		Mockito.doNothing().when(mailService)
 				.send(any(File.class));
-		exportCampaignService.creerSurvey(survey);
-		exportCampaignService.createCampaign(campaign);
+		surveyService.creerSurvey(survey);
+		campaignService.createCampaign(campaign);
 
 		exportCampaignService.sendResults(campaign,survey);
 		// THEN
